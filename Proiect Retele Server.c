@@ -6,6 +6,8 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <fcntl.h>
+#include <time.h>
+#include <utmp.h>
 #define LENGTH 1000
 
 int availableusers(char username)
@@ -15,7 +17,7 @@ int availableusers(char username)
     int gasit=0;
 
     textfile = fopen("utilizatori.txt","r");
-    if(textfile == NULL ) return 1;//trb schimbat
+    if(textfile == NULL ) return 0;//trb schimbat
     while(fgets(line,LENGTH,textfile))
     {
         if(strcmp(line,username)==1) 
@@ -28,10 +30,29 @@ int availableusers(char username)
     else printf("Utilizatorul nu exita!");
 }
 
+ void utilizatorilogati(struct utmp *u) 
+ {
+       
+        //ut_user,ut_host,ut_tv.tv_sec
+        
+        //username, hosname for remote login, time entry was made
+
+        while(u!=NULL)
+        { 
+            u = getutent();
+            printf("USER: %s \n HOSTNAME %s \n TIME ENTRY: ", u->ut_user, u->ut_host);
+            time_t time;
+            time=ut_tv.tv_sec;
+            printf("%25s", ctime(&time));
+        }
+
+        
+}
+
 void comenzi()
 {
     pid_t pid;
-    int ok;
+    int ok,iesire=0;
 
     switch(pid=fork()) 
     {
@@ -62,55 +83,70 @@ void comenzi()
             if(gasit==1)
             {
               printf("Utilizator logat!");
-              char comenzidisp[][40]={'get logged-users ,   logout',
+              char comenzidisp[][40]={'get-logged-users ,   logout',
                                       'get proc info    ,   quit  '};
               fgets(citire,100,stdin);
-              if(strcmp(citire,"get logged-users")==1)
-              {
-                switch (pid=fork())
+              int logout;
+              switch (pid=fork())
                 { 
                     case -1:            // eroare la fork
-                    perror("fork");  
-                    exit(1); 
-                
+                        perror("fork"); 
+                        exit(1); 
+
                     case 0:             // informatii 
+                    if(strcmp(citire,"get-logged-users")==1)
+                        {
+                            struct utmp *entry;
+                            utilizatorilogati(entry);
+                            
+                        }
               
-                    default:
-                
-                }
-              }
-              if(strcmp(citire,"get-proc-info")==1)
+                    /*
+                    if(strcmp(citire,"get-proc-info : pid")==1)
+                        {
+                            
+                        }
+                    */
+                    if(strcmp(citire,"logout")==1)
+                        {
+                            logout=1;
+                        }
+                    if(strcmp(citire,"quit")==1)
+                        {
+                            printf("Exiting the program...");
+                            
+                        }
+               /* switch (pid = fork())
               {
+                case -1:            // eroare la fork
+                perror("fork");  
+                exit(1); 
                 
-              }
-              if(strcmp(citire,"logout")==1)
-              {
-                
-              }
-              if(strcmp(citire,"quit")==1)
-              {
-                
-              }
-              switch (pid = fork())
-              {
-              case -1:            // eroare la fork
-               perror("fork");  
-               exit(1); 
-                
-              case 0:
+                case 0:
                 //utilizatorul este logat, urmeaza celelalte comenzi
               
-              default:
+                 
                 
-              }
-              exit(ok);// proces de iesire   
-            } 
-
-        default:            // proces parinte
-            
+              }*/ 
+                default: 
+                    exit(&logout);// proces de iesire   
+                } 
+            }
+        default:
+                  // proces parinte
+        if(iesire=1)
+        {
+            printf("Exiting the program ...\n");
+            exit(0);
+        }
+        
+        else
+        {
             sleep(60);// asteapta un exit 
             printf("Exiting the program, took to long to authenticate ...\n");
             exit(0);
+        }    
+        
             
             
     }
@@ -135,6 +171,7 @@ int main()
                 perror("Eroare la citirea din FIFO!");
         else {
             input[num] = '\0';
+            comenzi();
             //printf("S-au citit din FIFO %d bytes: \"%s\"\n", num, s);
 
         }
