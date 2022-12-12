@@ -54,7 +54,11 @@ int insert_user(user_t user)
     char *sql = "INSERT INTO users (username, password) VALUES (?, ?)";
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
     if (rc != SQLITE_OK) {
-        fprintf( //contiue
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+                sqlite3_close(db);
+
+                return 1;
+    }
 
     // Bind values to prepared statement
     sqlite3_bind_text(stmt, 1, user.username, -1, SQLITE_STATIC);
@@ -150,7 +154,7 @@ int main(int argc, char *argv[])
         // Accept incoming connection
         struct sockaddr_in client_addr;
         socklen_t client_addr_len = sizeof(client_addr);
-        int client_fd = accept(server_fd, (struct sockaddr*)&client_addr, & //de completat
+        int client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &client_addr_len)
 
         if (client_fd < 0) 
         {
