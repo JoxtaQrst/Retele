@@ -35,7 +35,7 @@ int connect_to_db()
 // Function for creating a table for storing user data
 int create_user_table() 
 {
-    char *sql = "CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT NOT NULL)";
+    char *sql = "CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT NOT NULL, tip TEXT NOT NULL)";
     char *err_msg = 0;
     int rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
     if (rc != SQLITE_OK) {
