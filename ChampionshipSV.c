@@ -45,13 +45,25 @@ int create_user_table()
     }
     return 1;
 }
+//TODO make a function in c that checks if the user is in the SQLite database and the password and username match with a given input and uses mutex
+
+//TODO make a function that "logs in" the user
+
+//TODO make a function that allows the admins only can create a tournament
+
+//TODO make a function that allows users to register to a tournament and get a response via email
+
+//TODO make a function that allows the admins only to delete a tournament
+
+//TODO make a function that allows users to reschedule a tournament
+
 
 // Function for inserting a new user into the table
 int insert_user(user_t user) 
 {
     // Use prepared statements for inserting user data to protect against SQL injection attacks
     sqlite3_stmt *stmt;
-    char *sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+    char *sql = "INSERT INTO users (username, password, tip) VALUES (?, ?, ?)";
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
@@ -63,6 +75,7 @@ int insert_user(user_t user)
     // Bind values to prepared statement
     sqlite3_bind_text(stmt, 1, user.username, -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, user.password, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, user.tip, -1, SQLITE_STATIC);
 
     // Execute prepared statement
     rc = sqlite3_step(stmt);
@@ -84,12 +97,14 @@ void *client_handler(void *arg)
     // Lock mutex
     pthread_mutex_lock(&mutex);
 
-    // Prompt user for username and password
+    // Prompt user for username, password and type
     user_t user;
     printf("Enter username: ");
     scanf("%s", user.username);
     printf("Enter password: ");
     scanf("%s", user.password);
+    printf("Enter user type ( 1-regular,2-admin)");
+    scanf("%s",user.tip)
 
     // Insert user into database
     if (insert_user(user)) {
