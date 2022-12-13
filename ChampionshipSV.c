@@ -13,6 +13,7 @@ typedef struct
 {
     char username[32];
     char password[32];
+    int tip;
 } user_t;
 
 // Global variable for SQLite database connection
@@ -45,7 +46,7 @@ int create_user_table()
     }
     return 1;
 }
-//TODO make a function in c that checks if the user is in the SQLite database and the password and username match with a given input and uses mutex
+//TODO make a function in c that checks if the user is in the SQLite database and the password and username match with a given input 
 
 //TODO make a function that "logs in" the user
 
