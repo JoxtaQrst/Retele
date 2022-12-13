@@ -47,6 +47,40 @@ int create_user_table()
     return 1;
 }
 //TODO make a function in c that checks if the user is in the SQLite database and the password and username match with a given input 
+int check_login(char *username, char *password)
+{
+    char *err_msg = 0;
+    char sql[200];
+
+    /* open database */
+    if(sqlite3_open("database.db", &db))
+    {
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return -1;
+    }
+
+    /* create SQL statement to check if the username and password match a record in the database */
+    sprintf(sql, "SELECT * FROM users WHERE username='%s' AND password='%s'", username, password);
+
+    /* execute SQL statement */
+    if(sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK)
+    {
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        return -1;
+    }
+
+    int rows = sqlite3_changes(db);
+
+    /* close database */
+    sqlite3_close(db);
+
+    /* return 1 if a record is found, 0 otherwise */
+    return (rows > 0) ? 1 : 0;
+}
+
 
 //TODO make a function that "logs in" the user
 
